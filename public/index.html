@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Page Title</title>
+
+    <!-- Add the following link tags for Bootstrap CSS and JS (if not already included) -->
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Your custom CSS styles -->
+    <style>
+        /* Customize the navbar background color */
+        .navbar {
+            background-color: #121212;
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-link {
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .navbar-nav .nav-link.active {
+            color: #f39c12;
+        }
+
+        .dropdown-menu {
+            background-color: #222323;
+        }
+
+        .dropdown-item {
+            color: #fff;
+        }
+
+        .form-control {
+            border-color: #fff;
+            margin-right: 10px;
+        }
+
+        .btn-outline-success {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        /* Container styling */
+        .container {
+            margin-top: 80px;
+            max-width: 400px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #F5F5F5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .c-nav {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .loc-btn{
+            color:#007bff;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Your existing HTML code here -->
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse c-nav" id="navbarSupportedContent">
+                <div class="c-nav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="#">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Link</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+                                aria-expanded="false">
+                                Dropdown
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Action</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </li>
+
+                    </ul>
+
+                    <button type="button" class="btn btn-primary btn-modal" data-toggle="modal"
+                        data-target="#exampleModal">
+                        Admin
+                    </button>
+                </div>
+
+
+                <form>
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Login</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Modal body content goes here -->
+                                    <div class="form-group">
+                                        <label for="username">Username</label>
+                                        <input type="text" class="form-control" id="username"
+                                            placeholder="Enter your username">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">Password</label>
+                                        <input type="password" class="form-control" id="password"
+                                            placeholder="Enter your password">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary"
+                                        onclick="submitLoginForm()">Login</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+    </nav>
+    </div>
+    </div>
+    </nav>
+
+    <div class="container">
+        <form enctype="multipart/form-data" id="fire-form">
+            <label for="file">Upload JPEG/JPG File:</label>
+            <div class="form-group">
+                <input type="file" id="file" name="file" accept=".jpg, .jpeg" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" pattern="[0-9]{10}"  placeholder="Enter your phone number"
+                   required >
+            </div>
+
+            <button onclick="submitFireForm()" type="button" class="btn btn-primary">Summit</button>
+            <button onclick="getLocation()" type="button" class="btn btn-outline-primary loc-btn">Get Location</button>
+
+        </form>
+    </div>
+
+    <!-- Rest of your HTML code, including the modal -->
+
+    <!-- Add the following script tags for Bootstrap JS (if not already included) -->
+    <!-- Bootstrap JS dependencies -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        var longitude = 0;
+        var latitude = 0;
+        
+        function submitFireForm(){
+            var form = document.getElementById("fire-form");
+
+            const formData = new FormData(form);
+
+            // if(!longitude || !latitude) return alert("Location needed to submit");
+
+            formData.append("latitude",latitude);
+            formData.append("longitude",longitude);
+
+            fetch('/fire', {
+                method: 'POST',
+                body: formData,
+            }).then((res) => {
+                res = res.json()
+            }).then(data => console.log(data))
+
+        }
+
+
+        function submitLoginForm() {
+            // Get the values from the form
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Make a POST request to the server
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: username, password: password }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // If login is successful, redirect to admin.html
+                        window.location.href = '/admin.html';
+                    } else {
+                        // If login fails, show an error message
+                        alert('Invalid credentials. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+   //map location
+        function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+function showPosition(position) {
+    latitude = position.coords.latitude;
+    longitude = position.coords.longitude;
+}
+
+function showError(error) {
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            alert("User denied the request for Geolocation.");
+            break;
+        case error.POSITION_UNAVAILABLE:
+            alert("Location information is unavailable.");
+            break;
+        case error.TIMEOUT:
+            alert("The request to get user location timed out.");
+            break;
+        case error.UNKNOWN_ERROR:
+            alert("An unknown error occurred.");
+            break;
+    }
+}
+    </script>
+
+
+
+</body>
+
+</html>
