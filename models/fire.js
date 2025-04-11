@@ -6,6 +6,11 @@ const schema = mongoose.Schema(
     phone: String,
     latitude: String,
     longitude: String,
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'denied'],
+      default: 'pending'
+    }
   },
   { collection: "fire", timestamp: true }
 );
