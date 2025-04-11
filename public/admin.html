@@ -22,10 +22,17 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
 
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
+
+    <!-- Leaflet MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
     <!-- Your custom CSS styles -->
     <style>
@@ -740,11 +747,59 @@
         <div class="analytics-section" id="analyticsSection">
             <div class="reports-header">
                 <h2 class="reports-title">Analytics Dashboard</h2>
-                <div class="time-filter">
-                    <button class="active" onclick="filterData('day')">Today</button>
-                    <button onclick="filterData('week')">This Week</button>
-                    <button onclick="filterData('month')">This Month</button>
-                    <button onclick="filterData('year')">This Year</button>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="time-filter">
+                        <button class="active" onclick="filterData('day')">Today</button>
+                        <button onclick="filterData('week')">This Week</button>
+                        <button onclick="filterData('month')">This Month</button>
+                        <button onclick="filterData('year')">This Year</button>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-filter"></i> Filters
+                        </button>
+                        <div class="dropdown-menu p-3" style="min-width: 300px;">
+                            <div class="mb-3">
+                                <label class="form-label">Status</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filterApproved" checked>
+                                    <label class="form-check-label" for="filterApproved">Approved</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filterPending" checked>
+                                    <label class="form-check-label" for="filterPending">Pending</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="filterDenied" checked>
+                                    <label class="form-check-label" for="filterDenied">Denied</label>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Response Time</label>
+                                <select class="form-select" id="responseTimeFilter">
+                                    <option value="all">All Times</option>
+                                    <option value="fast">Fast (< 15 min)</option>
+                                    <option value="medium">Medium (15-30 min)</option>
+                                    <option value="slow">Slow (> 30 min)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Location</label>
+                                <input type="text" class="form-control" id="locationFilter" placeholder="Search by location...">
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="applyFilters()">Apply Filters</button>
+                        </div>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                            <li><a class="dropdown-item" href="#" onclick="exportData('csv')">CSV</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('json')">JSON</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportData('pdf')">PDF</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -981,14 +1036,17 @@
         // Function to handle report actions (approve/deny)
         async function handleReportAction(reportId, action) {
             try {
-                console.log(`Updating report ${reportId} to status: ${action}`);
+                // Map the action to the correct status value
+                const status = action === 'approve' ? 'approved' : 'denied';
+                console.log(`Updating report ${reportId} to status: ${status}`);
+                
                 const response = await fetch(`/fire/${reportId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ status: action })
+                    body: JSON.stringify({ status })
                 });
 
                 let data;
@@ -1003,11 +1061,15 @@
                 
                 if (response.ok) {
                     // Refresh reports list
-                    loadReports();
+                    await loadReports();
+                    
                     // Refresh analytics if visible
                     if (document.getElementById('analyticsSection').style.display === 'block') {
-                        loadAnalyticsData();
+                        await loadAnalyticsData();
+                        updateCharts(currentTimeRange);
+                        updateMap(allReports);
                     }
+                    
                     // Show success message
                     alert(`Report ${action}d successfully!`);
                 } else {
@@ -1031,29 +1093,50 @@
         let reportsChart, locationChart;
         let allReports = [];
         let currentTimeRange = 'day';
+        let realTimeUpdateInterval;
 
-        document.getElementById('analyticsBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('analyticsSection').style.display = 'block';
-            document.querySelector('.reports-section').style.display = 'none';
-            document.getElementById('settingsSection').style.display = 'none';
-            
-            // Initialize analytics
-            initializeAnalytics();
-            
-            // Force a chart update after a short delay to ensure DOM is ready
-            setTimeout(() => {
-                updateCharts(currentTimeRange);
-            }, 100);
-        });
+        let activeFilters = {
+            status: ['approved', 'pending', 'denied'],
+            responseTime: 'all',
+            location: ''
+        };
 
         function initializeAnalytics() {
-            // Initialize charts
-            initializeCharts();
-            // Initialize map
-            initializeMap();
-            // Load and process data
-            loadAnalyticsData();
+            try {
+                console.log('Initializing analytics...');
+                
+                // Initialize map first
+                initializeMap();
+                
+                // Initialize charts
+                initializeCharts();
+                
+                // Load and process data
+                loadAnalyticsData();
+                
+                // Start real-time updates
+                startRealTimeUpdates();
+                
+                console.log('Analytics initialized successfully');
+            } catch (error) {
+                console.error('Error initializing analytics:', error);
+            }
+        }
+
+        function startRealTimeUpdates() {
+            // Clear any existing interval
+            if (realTimeUpdateInterval) {
+                clearInterval(realTimeUpdateInterval);
+            }
+            
+            // Update every 30 seconds
+            realTimeUpdateInterval = setInterval(async () => {
+                if (document.getElementById('analyticsSection').style.display === 'block') {
+                    await loadAnalyticsData();
+                    updateCharts(currentTimeRange);
+                    updateMap(allReports);
+                }
+            }, 30000);
         }
 
         function initializeCharts() {
@@ -1170,25 +1253,41 @@
         async function loadAnalyticsData() {
             try {
                 const response = await fetch('/fire');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 allReports = await response.json();
+                console.log('Fetched reports:', allReports);
                 
-                // Filter approved reports for analytics
+                // Filter reports by status
                 const approvedReports = allReports.filter(report => report.status === 'approved');
+                const pendingReports = allReports.filter(report => report.status === 'pending');
+                const deniedReports = allReports.filter(report => report.status === 'denied');
+                
+                console.log('Filtered reports:', {
+                    total: allReports.length,
+                    approved: approvedReports.length,
+                    pending: pendingReports.length,
+                    denied: deniedReports.length
+                });
                 
                 // Update analytics cards
-                document.getElementById('totalFires').textContent = approvedReports.length;
+                document.getElementById('totalFires').textContent = allReports.length;
                 document.getElementById('activeLocations').textContent = 
-                    new Set(approvedReports.map(r => `${r.latitude},${r.longitude}`)).size;
+                    new Set(allReports.map(r => `${r.latitude},${r.longitude}`)).size;
                 
-                // Calculate average response time (mock data for now)
+                // Calculate average response time
                 const avgResponseTime = approvedReports.length > 0 ? 
-                    Math.round(approvedReports.reduce((acc, report) => acc + (report.responseTime || 15), 0) / approvedReports.length) : 0;
+                    Math.round(approvedReports.reduce((acc, report) => {
+                        const createdAt = new Date(report.createdAt || new Date());
+                        const updatedAt = new Date(report.updatedAt || report.createdAt || new Date());
+                        const responseTime = (updatedAt - createdAt) / (1000 * 60);
+                        return acc + responseTime;
+                    }, 0) / approvedReports.length) : 0;
                 document.getElementById('responseTime').textContent = avgResponseTime;
                 
-                // Update charts with current time range
+                // Update charts and map
                 updateCharts(currentTimeRange);
-                
-                // Update map with all reports but different colors based on status
                 updateMap(allReports);
             } catch (error) {
                 console.error('Error loading analytics data:', error);
@@ -1202,7 +1301,7 @@
             // Filter data based on time range
             const now = new Date();
             const filteredReports = allReports.filter(report => {
-                const reportDate = new Date(report.createdAt);
+                const reportDate = new Date(report.createdAt || new Date());
                 switch(timeRange) {
                     case 'day':
                         return reportDate.toDateString() === now.toDateString();
@@ -1219,32 +1318,109 @@
                 }
             });
 
-            // Update reports chart
+            console.log('Filtered reports for charts:', filteredReports); // Debug log
+
+            // Update reports chart with status distribution
             const hours = Array.from({length: 24}, (_, i) => i);
-            const reportsByHour = hours.map(hour => 
-                filteredReports.filter(r => {
-                    const reportHour = new Date(r.createdAt).getHours();
+            const reportsByHour = hours.map(hour => {
+                const hourReports = filteredReports.filter(r => {
+                    const reportHour = new Date(r.createdAt || new Date()).getHours();
                     return reportHour === hour;
-                }).length
-            );
-
-            // Update the chart data
-            reportsChart.data.datasets[0].data = reportsByHour;
-            reportsChart.update('none'); // Use 'none' to prevent animation
-
-            // Update location chart
-            const locations = {};
-            filteredReports.forEach(report => {
-                const loc = `${report.latitude},${report.longitude}`;
-                locations[loc] = (locations[loc] || 0) + 1;
+                });
+                return {
+                    total: hourReports.length,
+                    approved: hourReports.filter(r => r.status === 'approved').length,
+                    pending: hourReports.filter(r => r.status === 'pending').length,
+                    denied: hourReports.filter(r => r.status === 'denied').length
+                };
             });
 
+            console.log('Reports by hour:', reportsByHour); // Debug log
+
+            // Update the chart data with multiple datasets
+            reportsChart.data.datasets = [
+                {
+                    label: 'Total Reports',
+                    data: reportsByHour.map(r => r.total),
+                    borderColor: '#2c3e50',
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                },
+                {
+                    label: 'Approved',
+                    data: reportsByHour.map(r => r.approved),
+                    borderColor: '#2ecc71',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                },
+                {
+                    label: 'Pending',
+                    data: reportsByHour.map(r => r.pending),
+                    borderColor: '#f1c40f',
+                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                },
+                {
+                    label: 'Denied',
+                    data: reportsByHour.map(r => r.denied),
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }
+            ];
+            reportsChart.update('none');
+
+            // Update location chart with status distribution
+            const locations = {};
+            filteredReports.forEach(report => {
+                if (!report.latitude || !report.longitude) return; // Skip reports without coordinates
+                
+                const loc = `${report.latitude},${report.longitude}`;
+                if (!locations[loc]) {
+                    locations[loc] = {
+                        total: 0,
+                        approved: 0,
+                        pending: 0,
+                        denied: 0
+                    };
+                }
+                locations[loc].total++;
+                locations[loc][report.status || 'pending']++;
+            });
+
+            console.log('Location data:', locations); // Debug log
+
             const topLocations = Object.entries(locations)
-                .sort((a, b) => b[1] - a[1])
+                .sort((a, b) => b[1].total - a[1].total)
                 .slice(0, 5);
 
             locationChart.data.labels = topLocations.map(([loc]) => loc);
-            locationChart.data.datasets[0].data = topLocations.map(([_, count]) => count);
+            locationChart.data.datasets = [
+                {
+                    label: 'Total',
+                    data: topLocations.map(([_, counts]) => counts.total),
+                    backgroundColor: '#2c3e50'
+                },
+                {
+                    label: 'Approved',
+                    data: topLocations.map(([_, counts]) => counts.approved),
+                    backgroundColor: '#2ecc71'
+                },
+                {
+                    label: 'Pending',
+                    data: topLocations.map(([_, counts]) => counts.pending),
+                    backgroundColor: '#f1c40f'
+                },
+                {
+                    label: 'Denied',
+                    data: topLocations.map(([_, counts]) => counts.denied),
+                    backgroundColor: '#e74c3c'
+                }
+            ];
             locationChart.update();
         }
 
@@ -1302,26 +1478,35 @@
         let markerCluster;
 
         function initializeMap() {
-            // Remove any existing map instance
-            if (map) {
-                map.remove();
+            try {
+                console.log('Initializing map...');
+                
+                // Remove any existing map instance
+                if (map) {
+                    map.remove();
+                }
+
+                // Initialize map centered on India
+                map = L.map('map').setView([20.5937, 78.9629], 5);
+
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                // Initialize marker cluster group
+                markerCluster = L.markerClusterGroup();
+                map.addLayer(markerCluster);
+
+                // Add map controls
+                addMapControls();
+                addMapLegend();
+
+                console.log('Map initialized successfully');
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                alert('Error initializing map. Please check your internet connection and try again.');
             }
-
-            // Initialize map centered on India
-            map = L.map('map').setView([20.5937, 78.9629], 5);
-
-            // Add OpenStreetMap tiles
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // Initialize marker cluster group
-            markerCluster = L.markerClusterGroup();
-            map.addLayer(markerCluster);
-
-            // Add map controls
-            addMapControls();
-            addMapLegend();
         }
 
         function addMapControls() {
@@ -1359,64 +1544,131 @@
         }
 
         function updateMap(reports) {
-            // Clear existing markers
-            clearMap();
+            try {
+                // Ensure map and markerCluster are initialized
+                if (!map || !markerCluster) {
+                    console.log('Map not initialized, initializing now...');
+                    initializeMap();
+                }
 
-            // Add new markers
-            reports.forEach(report => {
-                const marker = L.marker([report.latitude, report.longitude], {
-                    icon: getMarkerIcon(report)
+                // Clear existing markers
+                clearMap();
+
+                console.log('Updating map with reports:', reports);
+
+                // Add new markers
+                reports.forEach(report => {
+                    // Skip reports without valid coordinates
+                    if (!report.latitude || !report.longitude || 
+                        report.latitude === '0' || report.longitude === '0') {
+                        console.warn('Skipping report with invalid coordinates:', report);
+                        return;
+                    }
+
+                    try {
+                        const lat = parseFloat(report.latitude);
+                        const lng = parseFloat(report.longitude);
+                        
+                        if (isNaN(lat) || isNaN(lng)) {
+                            console.warn('Invalid coordinates for report:', report);
+                            return;
+                        }
+
+                        const marker = L.marker([lat, lng], {
+                            icon: getMarkerIcon(report)
+                        });
+
+                        // Add popup with report details
+                        marker.bindPopup(`
+                            <div class="map-popup">
+                                <h6>Fire Report Details</h6>
+                                <p><strong>Time:</strong> ${new Date(report.createdAt || new Date()).toLocaleString()}</p>
+                                <p><strong>Phone:</strong> ${report.phone || 'N/A'}</p>
+                                <p><strong>Status:</strong> ${getStatusText(report.status)}</p>
+                                ${report.imageUrl ? `<img src="${report.imageUrl}" style="max-width: 200px; margin-top: 10px;">` : ''}
+                            </div>
+                        `);
+
+                        markers.push(marker);
+                        markerCluster.addLayer(marker);
+                    } catch (error) {
+                        console.error('Error adding marker for report:', report, error);
+                    }
                 });
 
-                // Add popup with report details
-                marker.bindPopup(`
-                    <div class="map-popup">
-                        <h6>Fire Report Details</h6>
-                        <p><strong>Time:</strong> ${new Date(report.createdAt).toLocaleString()}</p>
-                        <p><strong>Phone:</strong> ${report.phone || 'N/A'}</p>
-                        <p><strong>Status:</strong> ${getStatusText(report.status)}</p>
-                        ${report.imageUrl ? `<img src="${report.imageUrl}" style="max-width: 200px; margin-top: 10px;">` : ''}
-                    </div>
-                `);
-
-                markers.push(marker);
-                markerCluster.addLayer(marker);
-            });
-
-            // Fit map to show all markers
-            if (markers.length > 0) {
-                const group = new L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.1));
+                // Fit map to show all markers
+                if (markers.length > 0) {
+                    const group = new L.featureGroup(markers);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                } else {
+                    console.warn('No valid markers to display on map');
+                }
+            } catch (error) {
+                console.error('Error updating map:', error);
+                alert('Error updating map. Please try again.');
             }
         }
 
         function getMarkerIcon(report) {
             const status = report.status || 'pending';
-            const color = status === 'approved' ? '#e74c3c' : 
-                        status === 'denied' ? '#95a5a6' : '#f39c12';
+            let color, icon;
+            
+            switch(status) {
+                case 'approved':
+                    color = '#e74c3c'; // Red for active fires
+                    icon = 'fa-fire';
+                    break;
+                case 'pending':
+                    color = '#f39c12'; // Orange for pending
+                    icon = 'fa-clock';
+                    break;
+                case 'denied':
+                    color = '#95a5a6'; // Gray for denied
+                    icon = 'fa-ban';
+                    break;
+                default:
+                    color = '#3498db'; // Blue for unknown
+                    icon = 'fa-question';
+            }
 
             return L.divIcon({
                 className: 'cluster-marker',
-                html: `<i class="fas fa-fire"></i>`,
+                html: `<i class="fas ${icon}"></i>`,
                 iconSize: [30, 30],
                 iconAnchor: [15, 15],
                 popupAnchor: [0, -15],
-                style: `background: ${color}; width: 30px; height: 30px;`
+                style: `
+                    background: ${color};
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                `
             });
         }
 
         function getStatusText(status) {
             switch(status) {
-                case 'active': return 'Active';
-                case 'recent': return 'Recent';
-                case 'resolved': return 'Resolved';
-                default: return 'Unknown';
+                case 'approved': return 'Active Fire';
+                case 'pending': return 'Pending Review';
+                case 'denied': return 'Resolved/Denied';
+                default: return 'Unknown Status';
             }
         }
 
         function clearMap() {
-            markers.forEach(marker => markerCluster.removeLayer(marker));
-            markers = [];
+            try {
+                if (markerCluster) {
+                    markerCluster.clearLayers();
+                }
+                markers = [];
+            } catch (error) {
+                console.error('Error clearing map:', error);
+            }
         }
 
         function refreshMap() {
@@ -1467,6 +1719,135 @@
             document.getElementById('settingsSection').style.display = 'none';
             // Load initial reports
             loadReports();
+        });
+
+        function exportData(format) {
+            const filteredReports = getFilteredReports();
+            let data, filename, contentType;
+
+            switch(format) {
+                case 'csv':
+                    data = convertToCSV(filteredReports);
+                    filename = 'fire_reports.csv';
+                    contentType = 'text/csv';
+                    break;
+                case 'json':
+                    data = JSON.stringify(filteredReports, null, 2);
+                    filename = 'fire_reports.json';
+                    contentType = 'application/json';
+                    break;
+                case 'pdf':
+                    // PDF generation would require a server endpoint
+                    alert('PDF export coming soon!');
+                    return;
+            }
+
+            const blob = new Blob([data], { type: contentType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        function convertToCSV(reports) {
+            const headers = ['ID', 'Status', 'Phone', 'Latitude', 'Longitude', 'Created At', 'Updated At'];
+            const rows = reports.map(report => [
+                report._id,
+                report.status,
+                report.phone || 'N/A',
+                report.latitude,
+                report.longitude,
+                new Date(report.createdAt).toISOString(),
+                new Date(report.updatedAt || report.createdAt).toISOString()
+            ]);
+            
+            return [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+        }
+
+        function getFilteredReports() {
+            const now = new Date();
+            return allReports.filter(report => {
+                // Time range filter
+                const reportDate = new Date(report.createdAt);
+                let timeFilter = true;
+                switch(currentTimeRange) {
+                    case 'day':
+                        timeFilter = reportDate.toDateString() === now.toDateString();
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+                        timeFilter = reportDate >= weekAgo;
+                        break;
+                    case 'month':
+                        timeFilter = reportDate.getMonth() === now.getMonth() && 
+                                   reportDate.getFullYear() === now.getFullYear();
+                        break;
+                    case 'year':
+                        timeFilter = reportDate.getFullYear() === now.getFullYear();
+                        break;
+                }
+                
+                // Status filter
+                const statusFilter = activeFilters.status.includes(report.status);
+                
+                // Response time filter
+                let responseTimeFilter = true;
+                if (activeFilters.responseTime !== 'all') {
+                    const createdAt = new Date(report.createdAt);
+                    const updatedAt = new Date(report.updatedAt || report.createdAt);
+                    const responseTime = (updatedAt - createdAt) / (1000 * 60); // in minutes
+                    
+                    switch(activeFilters.responseTime) {
+                        case 'fast':
+                            responseTimeFilter = responseTime < 15;
+                            break;
+                        case 'medium':
+                            responseTimeFilter = responseTime >= 15 && responseTime <= 30;
+                            break;
+                        case 'slow':
+                            responseTimeFilter = responseTime > 30;
+                            break;
+                    }
+                }
+                
+                // Location filter
+                const locationFilter = activeFilters.location === '' || 
+                    `${report.latitude},${report.longitude}`.toLowerCase().includes(activeFilters.location);
+                
+                return timeFilter && statusFilter && responseTimeFilter && locationFilter;
+            });
+        }
+
+        function applyFilters() {
+            // Update active filters
+            activeFilters.status = [];
+            if (document.getElementById('filterApproved').checked) activeFilters.status.push('approved');
+            if (document.getElementById('filterPending').checked) activeFilters.status.push('pending');
+            if (document.getElementById('filterDenied').checked) activeFilters.status.push('denied');
+            
+            activeFilters.responseTime = document.getElementById('responseTimeFilter').value;
+            activeFilters.location = document.getElementById('locationFilter').value.toLowerCase();
+            
+            // Update charts and map with filtered data
+            updateCharts(currentTimeRange);
+            updateMap(allReports);
+        }
+
+        // Add cleanup when leaving analytics section
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (realTimeUpdateInterval) {
+                    clearInterval(realTimeUpdateInterval);
+                }
+            } else if (document.getElementById('analyticsSection').style.display === 'block') {
+                startRealTimeUpdates();
+            }
         });
     </script>
 </body>
