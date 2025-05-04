@@ -1100,10 +1100,10 @@
                                 </div>
                             </div>
                             <div class="video-wrapper">
-                                <video id="streamVideo" class="stream-video" controls>
-                                    <source src="http://localhost:5050/stream" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
+                                <img id="streamVideo" class="stream-video" 
+                                     src="http://localhost:5050/" 
+                                     alt="Live Video Stream">
+                                <!-- Using img tag for MJPEG stream -->
                                 <div class="stream-overlay">
                                     <div class="loading-spinner">
                                         <i class="fas fa-spinner fa-spin"></i>
@@ -2928,7 +2928,7 @@
             errorMessage.style.display = 'none';
             statusIndicator.classList.remove('connected', 'disconnected');
             statusText.textContent = 'Connecting...';
-
+            
             // Handle video events
             video.addEventListener('loadeddata', () => {
                 loadingSpinner.style.display = 'none';
@@ -2954,31 +2954,23 @@
                     playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Play';
                 }
             });
-
-            // Quality button functionality
-            qualityBtn.addEventListener('click', () => {
-                // Implement quality selection logic here
-                const qualities = ['Auto', 'High', 'Medium', 'Low'];
-                const currentQuality = document.querySelector('.stream-quality').textContent.split(': ')[1];
-                const currentIndex = qualities.indexOf(currentQuality);
-                const nextQuality = qualities[(currentIndex + 1) % qualities.length];
-                document.querySelector('.stream-quality').textContent = `Quality: ${nextQuality}`;
-                // Here you would typically adjust the stream quality
-            });
-
-            // Update stream information
-            function updateStreamInfo() {
-                const fps = video.getVideoTracks()[0]?.getSettings().frameRate || '--';
-                const width = video.videoWidth || '--';
-                const height = video.videoHeight || '--';
-                document.querySelector('.stream-fps').textContent = `FPS: ${fps}`;
-                document.querySelector('.stream-resolution').textContent = `Resolution: ${width}x${height}`;
-            }
-
-            // Start the stream
-            video.load();
         }
+        
+        // Update stream information (for MJPEG)
+        function updateStreamInfo() {
+            // You won't be able to directly access FPS or resolution 
+            // with an <img> tag like you would with a <video> element.
+            // You could implement custom logic here if needed,
+            // but for a basic implementation, just leave it as "N/A"
+            document.querySelector('.stream-fps').textContent = 'FPS: N/A';
+            document.querySelector('.stream-resolution').textContent = 'Resolution: N/A';
+        }
+        
+        // Trigger initial update
+        updateStreamInfo();
 
+
+    
         function getMarkerIcon(report) {
             // Ensure status is properly normalized
             const status = (report.status || 'pending').toLowerCase();

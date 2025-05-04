@@ -138,3 +138,17 @@ class FormHandler {
 
 // Export the class
 window.FormHandler = FormHandler; 
+document.getElementById('file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block'; // Show the image preview
+        }
+        reader.readAsDataURL(file);
+    } else {
+        document.getElementById('imagePreview').style.display = 'none'; // Hide if no file
+    }
+});
