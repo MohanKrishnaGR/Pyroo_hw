@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fire Detection System - Report and detect fire incidents using AI technology">
+    <meta name="keywords" content="fire detection, fire safety, emergency response, AI fire detection">
+    <meta name="author" content="Fire Detection System">
+    <meta property="og:title" content="Fire Detection System">
+    <meta property="og:description" content="Report and detect fire incidents using AI technology">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#e74c3c">
+    <link rel="manifest" href="manifest.json">
+    <title>Fire Detection System</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --dark-bg: #1a1a1a;
+            --dark-text: #ffffff;
+            --hero-bg: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9));
+            --transition-speed: 0.3s;
+            --notification-success: #2ecc71;
+            --notification-error: #e74c3c;
+            --emergency-red: #e74c3c;
+            --emergency-yellow: #f1c40f;
+            --emergency-green: #2ecc71;
+            --emergency-text: #ffffff;
+            --emergency-bg: #2c3e50;
+            --critical-size: 1.2rem;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #34495e;
+            --text-color: #ffffff;
+            --light-bg: var(--dark-bg);
+            --dark-text: #ffffff;
+            --hero-bg: linear-gradient(rgba(26, 26, 26, 0.9), rgba(26, 26, 26, 0.9));
+            --emergency-bg: #1a1a1a;
+        }
+
+        [data-emergency="true"] {
+            --primary-color: var(--emergency-red);
+            --text-color: var(--emergency-text);
+            --light-bg: var(--emergency-bg);
+            font-size: var(--critical-size);
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+
+        .form-title i {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-outline-primary {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            border-color: var(--secondary-color);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .file-input-label i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .admin-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            background-color: #c0392b;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 20px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: var(--accent-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--accent-color);
+        }
+
+        .form-control.is-valid {
+            border-color: var(--success-color);
+        }
+
+        .hero-section {
+            background: var(--hero-bg), url('https://images.unsplash.com/photo-1518562180175-34a163b1a9a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .map-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            background-color: #f8f9fa;
+            border: 2px dashed #ddd;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            display: none;
+            animation: slideIn 0.5s ease;
+            z-index: 1000;
+        }
+
+        .notification.success {
+            background-color: var(--notification-success);
+        }
+
+        .notification.error {
+            background-color: var(--notification-error);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #f0f0f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
+            cursor: help;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+                margin: 0 10px;
+            }
+        }
+
+        .emergency-header {
+            background-color: var(--emergency-red);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .emergency-contacts {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .emergency-contacts button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: var(--emergency-red);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .emergency-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--emergency-red);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .emergency-mode-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        .emergency-mode-toggle.active {
+            animation: none;
+            background: #c0392b;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+        }
+
+        .emergency-mode-toggle i {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .emergency-mode-toggle.active i {
+            transform: rotate(180deg);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+
+        .emergency-mode-tooltip {
+            position: absolute;
+            right: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--emergency-red);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .emergency-mode-toggle:hover .emergency-mode-tooltip {
+            opacity: 1;
+        }
+
+        .emergency-mode-countdown {
+            display: none;
+        }
+
+        .voice-input {
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .voice-input button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+
+        .emergency-checklist {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .emergency-checklist h3 {
+            color: var(--emergency-red);
+            margin-bottom: 15px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .checklist-item input {
+            margin-right: 10px;
+        }
+
+        .location-methods {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .location-method {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .location-method.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .critical-info {
+            background: var(--emergency-red);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            [data-emergency="true"] {
+                --critical-size: 1.4rem;
+            }
+
+            .form-container {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .emergency-contacts {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                top: auto;
+            }
+        }
+
+        /* Add these new styles for exit button */
+        .emergency-exit-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: var(--emergency-red);
+            border: 2px solid var(--emergency-red);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1001;
+            transition: all 0.3s ease;
+            animation: pulseExit 2s infinite;
+        }
+
+        .emergency-exit-button:hover {
+            transform: scale(1.1);
+            background: var(--emergency-red);
+            color: white;
+        }
+
+        .emergency-exit-button i {
+            font-size: 20px;
+        }
+
+        @keyframes pulseExit {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+
+        .emergency-exit-tooltip {
+            position: absolute;
+            left: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            color: var(--emergency-red);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border: 1px solid var(--emergency-red);
+        }
+
+        .emergency-exit-button:hover .emergency-exit-tooltip {
+            opacity: 1;
+        }
+
+        /* Update emergency mode styles */
+        [data-emergency="true"] .emergency-exit-button {
+            display: flex;
+        }
+
+        [data-emergency="true"] .emergency-mode-toggle {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="emergency-header" id="emergencyHeader">
+        EMERGENCY MODE ACTIVATED - LARGER TEXT AND HIGH CONTRAST
+    </div>
+
+    <button class="emergency-mode-toggle" id="emergencyModeToggle" aria-label="Toggle emergency mode">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span class="emergency-mode-tooltip">Activate Emergency Mode</span>
+    </button>
+
+    <button class="emergency-exit-button" id="emergencyExitButton" aria-label="Exit emergency mode">
+        <i class="fas fa-times"></i>
+        <span class="emergency-exit-tooltip">Exit Emergency Mode</span>
+    </button>
+
+    <div class="emergency-contacts" id="emergencyContacts">
+        <h3>Emergency Contacts</h3>
+        <button onclick="callEmergency('fire')">
+            <i class="fas fa-fire"></i> Fire Department (101)
+        </button>
+        <button onclick="callEmergency('police')">
+            <i class="fas fa-shield-alt"></i> Police (100)
+        </button>
+        <button onclick="callEmergency('ambulance')">
+            <i class="fas fa-ambulance"></i> Ambulance (108)
+        </button>
+        <button onclick="callEmergency('disaster')">
+            <i class="fas fa-exclamation-triangle"></i> Disaster Management (1077)
+        </button>
+        <button onclick="callEmergency('women')">
+            <i class="fas fa-female"></i> Women Helpline (1091)
+        </button>
+        <button onclick="callEmergency('child')">
+            <i class="fas fa-child"></i> Child Helpline (1098)
+        </button>
+        <button onclick="callEmergency('national')">
+            <i class="fas fa-phone-alt"></i> National Emergency (112)
+        </button>
+    </div>
+
+    <div class="loading-overlay" role="status" aria-label="Loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark" role="navigation">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" aria-label="Fire Detection System Home">
+                <i class="fas fa-fire" aria-hidden="true"></i>
+                Fire Detection System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" aria-current="page">
+                            <i class="fas fa-home" aria-hidden="true"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#report-section" onclick="scrollToReport()">
+                            <i class="fas fa-fire-extinguisher" aria-hidden="true"></i> Report Fire
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#emergencyContactsModal">
+                            <i class="fas fa-phone-alt" aria-hidden="true"></i> Emergency Contacts
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#fireGuideModal">
+                            <i class="fas fa-book" aria-hidden="true"></i> Fire Safety Guide
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#reportHistoryModal">
+                            <i class="fas fa-history" aria-hidden="true"></i> Report History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#nearbyStationsModal">
+                            <i class="fas fa-fire-extinguisher" aria-hidden="true"></i> Nearby Fire Stations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#sopGuidelinesModal">
+                            <i class="fas fa-clipboard-list" aria-hidden="true"></i> SOP & Guidelines
+                        </a>
+                    </li>
+                </ul>
+                <button type="button" class="btn admin-btn" data-bs-toggle="modal" data-bs-target="#adminModal"
+                    aria-label="Admin Login">
+                    <i class="fas fa-user-shield" aria-hidden="true"></i> Admin Login
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Fire Detection System</h1>
+            <p class="hero-subtitle">Help us keep your community safe by reporting fire incidents quickly and accurately</p>
+        </div>
+    </section>
+
+    <div class="main-container">
+        <div class="form-container">
+            <div class="form-title">
+                <i class="fas fa-fire-extinguisher" aria-hidden="true"></i>
+                <h2>Report Fire Incident</h2>
+            </div>
+            <form enctype="multipart/form-data" id="fire-form" role="form" aria-label="Fire Incident Report Form">
+                <div class="form-group">
+                    <label class="form-label" for="file">
+                        Upload Fire Image
+                        <span class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Upload a clear image of the fire incident. Supported formats: JPEG/JPG</span>
+                        </span>
+                    </label>
+                    <div class="file-input-wrapper">
+                        <label class="file-input-label" for="file" role="button" tabindex="0">
+                            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                            Choose a JPEG/JPG file
+                        </label>
+                        <input type="file" id="file" name="file" accept=".jpg, .jpeg" required
+                            aria-describedby="fileError">
+                        <div id="fileError" class="error-message" role="alert"></div>
+                    </div>
+                    <img id="imagePreview" class="image-preview" alt="Preview of uploaded image"
+                         style="max-width: 100%; height: auto; margin-top: 10px; border-radius: 5px; border: 1px solid #ccc; padding: 5px;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">
+                        Phone Number
+                        <span class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Enter your 10-digit phone number for emergency contact</span>
+                        </span>
+                    </label>
+                    <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}"
+                        placeholder="Enter your phone number" required aria-describedby="phoneError">
+                    <div id="phoneError" class="error-message" role="alert"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="location">
+                        Location
+                        <span class="tooltip">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="tooltip-text">Click the button below to automatically capture your location</span>
+                        </span>
+                    </label>
+                    <div class="map-preview" id="mapPreview"></div>
+                    <div class="button-group">
+                        <button type="button" class="btn btn-outline-primary" onclick="getLocation()">
+                            <i class="fas fa-map-marker-alt"></i> Get Location
+                        </button>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress" id="uploadProgress"></div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-primary" onclick="submitFireForm()">
+                        <i class="fas fa-paper-plane"></i> Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon" aria-hidden="true"></i>
+    </button>
+
+    <footer role="contentinfo">
+        <div class="container">
+            <p>&copy; 2024 Fire Detection System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Admin Modal -->
+    <div class="modal fade" id="adminModal" tabindex="-1" aria-labelledby="adminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminModalLabel">
+                        <i class="fas fa-user-shield"></i> Admin Login
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="adminLoginForm">
+                <div class="modal-body">
+                        <div class="form-group mb-3">
+                        <label class="form-label" for="username">Username</label>
+                            <input type="text" class="form-control" id="username" placeholder="Enter your username" required>
+                    </div>
+                        <div class="form-group mb-3">
+                        <label class="form-label" for="password">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Contacts Modal -->
+    <div class="modal fade" id="emergencyContactsModal" tabindex="-1" aria-labelledby="emergencyContactsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emergencyContactsModalLabel">
+                        <i class="fas fa-phone-alt"></i> Emergency Contacts
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <a href="tel:101" class="list-group-item list-group-item-action">
+                            <i class="fas fa-fire"></i> Fire Department: 101
+                        </a>
+                        <a href="tel:100" class="list-group-item list-group-item-action">
+                            <i class="fas fa-shield-alt"></i> Police: 100
+                        </a>
+                        <a href="tel:108" class="list-group-item list-group-item-action">
+                            <i class="fas fa-ambulance"></i> Ambulance: 108
+                        </a>
+                        <a href="tel:1077" class="list-group-item list-group-item-action">
+                            <i class="fas fa-exclamation-triangle"></i> Disaster Management: 1077
+                        </a>
+                        <a href="tel:1091" class="list-group-item list-group-item-action">
+                            <i class="fas fa-female"></i> Women Helpline: 1091
+                        </a>
+                        <a href="tel:1098" class="list-group-item list-group-item-action">
+                            <i class="fas fa-child"></i> Child Helpline: 1098
+                        </a>
+                        <a href="tel:112" class="list-group-item list-group-item-action">
+                            <i class="fas fa-phone-alt"></i> National Emergency: 112
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fire Safety Guide Modal -->
+    <div class="modal fade" id="fireGuideModal" tabindex="-1" aria-labelledby="fireGuideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fireGuideModalLabel">
+                        <i class="fas fa-book"></i> Fire Safety Guide
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="fireGuideAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    <i class="fas fa-exclamation-triangle"></i> What to do during a fire
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#fireGuideAccordion">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li>Stay calm and don't panic</li>
+                                        <li>Call emergency services immediately</li>
+                                        <li>Use fire extinguishers if safe to do so</li>
+                                        <li>Follow evacuation routes</li>
+                                        <li>Stay low to avoid smoke inhalation</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    <i class="fas fa-shield-alt"></i> Fire Prevention Tips
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#fireGuideAccordion">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li>Install smoke detectors</li>
+                                        <li>Keep fire extinguishers accessible</li>
+                                        <li>Don't overload electrical outlets</li>
+                                        <li>Store flammable materials safely</li>
+                                        <li>Regularly check electrical wiring</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report History Modal -->
+    <div class="modal fade" id="reportHistoryModal" tabindex="-1" aria-labelledby="reportHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportHistoryModalLabel">
+                        <i class="fas fa-history"></i> Your Report History
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Your recent fire incident reports will appear here.
+                    </div>
+                    <div id="reportHistoryList" class="list-group">
+                        <!-- Reports will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nearby Fire Stations Modal -->
+    <div class="modal fade" id="nearbyStationsModal" tabindex="-1" aria-labelledby="nearbyStationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nearbyStationsModalLabel">
+                        <i class="fas fa-fire-extinguisher"></i> Nearby Fire Stations
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nearbyStationsMap" style="height: 400px; width: 100%;">
+                        <!-- Map will be loaded here -->
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary" onclick="refreshNearbyStations()">
+                            <i class="fas fa-sync-alt"></i> Refresh Location
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOP & Guidelines Modal -->
+    <div class="modal fade" id="sopGuidelinesModal" tabindex="-1" aria-labelledby="sopGuidelinesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sopGuidelinesModalLabel">
+                        <i class="fas fa-clipboard-list"></i> Fire Safety SOP & Guidelines
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="sopGuidelinesAccordion">
+                        <!-- Emergency Response SOP -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSOP1">
+                                    <i class="fas fa-exclamation-circle"></i> Emergency Response SOP
+                                </button>
+                            </h2>
+                            <div id="collapseSOP1" class="accordion-collapse collapse show" data-bs-parent="#sopGuidelinesAccordion">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li><strong>Immediate Actions</strong>
+                                            <ul>
+                                                <li>Stay calm and assess the situation</li>
+                                                <li>Activate the nearest fire alarm</li>
+                                                <li>Call emergency services (101)</li>
+                                                <li>Evacuate the area immediately</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>During Evacuation</strong>
+                                            <ul>
+                                                <li>Use designated evacuation routes</li>
+                                                <li>Do not use elevators</li>
+                                                <li>Stay low to avoid smoke inhalation</li>
+                                                <li>Assist others if safe to do so</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Assembly Point</strong>
+                                            <ul>
+                                                <li>Proceed to designated assembly area</li>
+                                                <li>Do not re-enter the building</li>
+                                                <li>Wait for emergency personnel</li>
+                                                <li>Report any missing persons</li>
+                                            </ul>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fire Prevention Guidelines -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSOP2">
+                                    <i class="fas fa-shield-alt"></i> Fire Prevention Guidelines
+                                </button>
+                            </h2>
+                            <div id="collapseSOP2" class="accordion-collapse collapse" data-bs-parent="#sopGuidelinesAccordion">
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Electrical Safety</h6>
+                                            <ul>
+                                                <li>Regularly inspect electrical wiring</li>
+                                                <li>Avoid overloading power outlets</li>
+                                                <li>Use surge protectors</li>
+                                                <li>Unplug unused appliances</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Fire Extinguisher Use</h6>
+                                            <ul>
+                                                <li>P.A.S.S. Method:
+                                                    <ul>
+                                                        <li>Pull the pin</li>
+                                                        <li>Aim at the base</li>
+                                                        <li>Squeeze the handle</li>
+                                                        <li>Sweep side to side</li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Building Safety Standards -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSOP3">
+                                    <i class="fas fa-building"></i> Building Safety Standards
+                                </button>
+                            </h2>
+                            <div id="collapseSOP3" class="accordion-collapse collapse" data-bs-parent="#sopGuidelinesAccordion">
+                                <div class="accordion-body">
+                                    <ul>
+                                        <li>Maintain clear emergency exits</li>
+                                        <li>Regular fire safety inspections</li>
+                                        <li>Proper storage of flammable materials</li>
+                                        <li>Functioning smoke detectors</li>
+                                        <li>Accessible fire extinguishers</li>
+                                        <li>Clear evacuation routes</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reporting Procedures -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSOP4">
+                                    <i class="fas fa-file-alt"></i> Reporting Procedures
+                                </button>
+                            </h2>
+                            <div id="collapseSOP4" class="accordion-collapse collapse" data-bs-parent="#sopGuidelinesAccordion">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li><strong>Immediate Reporting</strong>
+                                            <ul>
+                                                <li>Call emergency services (101)</li>
+                                                <li>Provide exact location</li>
+                                                <li>Describe the situation</li>
+                                                <li>Follow operator instructions</li>
+                                            </ul>
+                                        </li>
+                                        <li><strong>Documentation</strong>
+                                            <ul>
+                                                <li>Record incident details</li>
+                                                <li>Note any injuries</li>
+                                                <li>Document property damage</li>
+                                                <li>Submit official report</li>
+                                            </ul>
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="downloadSOP()">
+                        <i class="fas fa-download"></i> Download Guidelines
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <!-- Custom JS Modules -->
+    <script src="js/notification.js"></script>
+    <script src="js/form-handler.js"></script>
+    <script src="js/emergency-mode.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 14
+names: ['dangerous', 'explosive', 'fire', 'flammable', 'flammable-solid', 'infectious-substance', 'inhalation-hazard', 'non-flammable-gas', 'organic-peroxide', 'oxygen', 'people', 'poison', 'radioactive', 'spontaneously-combustible']
+
+roboflow:
+  workspace: datafied
+  project: last-3adst
+  version: 2
+  license: MIT
+  url: https://universe.roboflow.com/datafied/last-3adst/dataset/2

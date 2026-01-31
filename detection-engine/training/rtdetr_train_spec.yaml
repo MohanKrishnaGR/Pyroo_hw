@@ -1,0 +1,50 @@
+# NVIDIA TAO Toolkit Specification for RT-DETR Fire Detection
+# Target: Jetson Nano (Optimization: TensorRT FP16)
+
+dataset:
+  train_data_sources:
+    - image_dir: /data/fire_v1/train/images
+      label_dir: /data/fire_v1/train/labels
+  val_data_sources:
+    - image_dir: /data/fire_v1/val/images
+      label_dir: /data/fire_v1/val/labels
+  num_classes: 2
+  class_map:
+    0: fire
+    1: person
+
+model:
+  architecture: rtdetr
+  backbone: resnet101  
+  use_bottleneck: True
+  freeze_bn: True
+  input_width: 720
+  input_height: 720
+
+train:
+  batch_size_per_gpu: 8
+  num_epochs: 100
+  optim:
+    lr: 0.0001
+    weight_decay: 0.0001
+  lr_scheduler:
+    type: soft_step
+    learning_rate_steps: [0.6, 0.8, 0.9]
+    learning_rate_decay: 0.1
+
+export:
+  output_format: engine
+  data_type: fp16  
+  workspace_size: 1024
+  max_batch_size: 1
+  calibration:
+    method: entropy_v2
+    num_calib_images: 500
+
+# Targeted Augmentations 
+augmentation:
+  random_flip: True
+  random_brightness: 0.2
+  random_contrast: 0.2
+  gaussian_blur: 0.1
+  synthetic_smoke_overlay: 0.05
