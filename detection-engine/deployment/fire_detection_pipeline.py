@@ -5,17 +5,18 @@ import os
 import time
 from datetime import datetime
 import gi
-gi.require_version('Gst', '1.0')
+
+gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
-import pyds # NVIDIA DeepStream bindings
+import pyds  # NVIDIA DeepStream bindings
 
 # Import our notification utility
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from utils.notifications import NotificationManager, determine_severity
+from core.notifications import NotificationManager, determine_severity
 
 # PGIE (Primary GPU Inference Engine) Class IDs based on RT-DETR/YOLO mapping
 PGIE_CLASS_ID_FIRE = 0
 PGIE_CLASS_ID_PERSON = 1
+
 
 def osd_sink_pad_buffer_probe(pad, info, u_data):
     """
@@ -41,15 +42,15 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
         frame_number = frame_meta.frame_num
         num_rects = frame_meta.num_obj_meta
         l_obj = frame_meta.obj_meta_list
-        
+
         detected_classes = set()
-        
+
         while l_obj is not None:
             try:
                 obj_meta = pyds.NvDsObjectMeta.cast(l_obj.data)
             except StopIteration:
                 break
-            
+
             # Identify classes (Assuming mapping: 0=fire, 1=person, etc.)
             if obj_meta.class_id == PGIE_CLASS_ID_FIRE:
                 detected_classes.add("fire")
@@ -57,15 +58,15 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
                 detected_classes.add("person")
             else:
                 detected_classes.add("other")
-            
-            try: 
+
+            try:
                 l_obj = l_obj.next
             except StopIteration:
                 break
 
         # Check severity and notify
         severity = determine_severity(detected_classes)
-        if severity and (frame_number % 30 == 0): # Notify once per second at 30fps
+        if severity and (frame_number % 30 == 0):  # Notify once per second at 30fps
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"Frame {frame_number}: {severity} severity fire detected!")
             u_data.send_sns_notification(severity, timestamp)
@@ -73,8 +74,9 @@ def osd_sink_pad_buffer_probe(pad, info, u_data):
         try:
             l_frame = l_frame.next
         except StopIteration:
-            break	
+            break
     return Gst.PadProbeReturn.OK
+
 
 def main(args):
     # Initialize Notification Manager
@@ -90,15 +92,20 @@ def main(args):
     # Create Elements
     source = Gst.ElementFactory.make("nvv4l2camerasrc", "camera-source")
     caps = Gst.ElementFactory.make("capsfilter", "filter")
-    caps.set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM), width=1280, height=720, format=UYVY, framerate=30/1"))
-    
+    caps.set_property(
+        "caps",
+        Gst.Caps.from_string(
+            "video/x-raw(memory:NVMM), width=1280, height=720, format=UYVY, framerate=30/1"
+        ),
+    )
+
     vidconv = Gst.ElementFactory.make("nvvideoconvert", "converter")
     nvosd = Gst.ElementFactory.make("nvdsosd", "onscreendisplay")
     sink = Gst.ElementFactory.make("nveglglessink", "display-sink")
 
     # The Inference Engine (RT-DETR via TensorRT)
     pgie = Gst.ElementFactory.make("nvinfer", "primary-inference")
-    pgie.set_property('config-file-path', "rtdetr_config.txt")
+    pgie.set_property("config-file-path", "rtdetr_config.txt")
 
     # Add elements to pipeline
     pipeline.add(source)
@@ -120,12 +127,14 @@ def main(args):
     if not osdsinkpad:
         sys.stderr.write(" Unable to get sink pad of nvosd \n")
     else:
-        osdsinkpad.add_probe(Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, notifier)
+        osdsinkpad.add_probe(
+            Gst.PadProbeType.BUFFER, osd_sink_pad_buffer_probe, notifier
+        )
 
     # Start playing
     loop = GLib.MainLoop()
     pipeline.set_state(Gst.State.PLAYING)
-    
+
     try:
         loop.run()
     except:
@@ -134,5 +143,6 @@ def main(args):
     # Clean up
     pipeline.set_state(Gst.State.NULL)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

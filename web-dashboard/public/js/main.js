@@ -1,62 +1,63 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize form handler
-    const formHandler = new FormHandler();
-    formHandler.init();
+  // Initialize form handler
+  const formHandler = new FormHandler();
+  formHandler.init();
 
-    // Initialize emergency mode
-    const emergencyMode = new EmergencyMode();
+  // Initialize emergency mode
+  const emergencyMode = new EmergencyMode();
 
-    // Initialize theme manager
-    const themeManager = new ThemeManager();
+  // Initialize theme manager
+  const themeManager = new ThemeManager();
 
-    // Initialize auth
-    const auth = new Auth();
+  // Initialize auth
+  const auth = new Auth();
 
-    // Initialize modals
-    const reportHistoryModal = document.getElementById('reportHistoryModal');
-    const nearbyStationsModal = document.getElementById('nearbyStationsModal');
+  // Initialize modals
+  const reportHistoryModal = document.getElementById('reportHistoryModal');
+  const nearbyStationsModal = document.getElementById('nearbyStationsModal');
 
-    if (reportHistoryModal) {
-        reportHistoryModal.addEventListener('shown.bs.modal', loadReportHistory);
-    }
+  if (reportHistoryModal) {
+    reportHistoryModal.addEventListener('shown.bs.modal', loadReportHistory);
+  }
 
-    if (nearbyStationsModal) {
-        nearbyStationsModal.addEventListener('shown.bs.modal', loadNearbyStations);
-    }
+  if (nearbyStationsModal) {
+    nearbyStationsModal.addEventListener('shown.bs.modal', loadNearbyStations);
+  }
 
-    // Add global functions
-    window.submitFireForm = () => formHandler.submitForm();
-    window.getLocation = () => formHandler.getLocation();
-    window.callEmergency = (type) => EmergencyMode.callEmergency(type);
-    window.scrollToReport = () => {
-        const reportSection = document.querySelector('.form-container');
-        reportSection.scrollIntoView({ behavior: 'smooth' });
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        event.target.classList.add('active');
-    };
+  // Add global functions
+  window.submitFireForm = () => formHandler.submitForm();
+  window.getLocation = () => formHandler.getLocation();
+  window.callEmergency = (type) => EmergencyMode.callEmergency(type);
+  window.scrollToReport = () => {
+    const reportSection = document.querySelector('.form-container');
+    reportSection.scrollIntoView({ behavior: 'smooth' });
+    document.querySelectorAll('.nav-link').forEach((link) => {
+      link.classList.remove('active');
+    });
+    event.target.classList.add('active');
+  };
 
-    // Initialize voice input if available
-    if ('webkitSpeechRecognition' in window) {
-        setupVoiceInput();
-    }
+  // Initialize voice input if available
+  if ('webkitSpeechRecognition' in window) {
+    setupVoiceInput();
+  }
 
-    // Initialize service worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('ServiceWorker registration successful');
-            })
-            .catch(err => {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-    }
+  // Initialize service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('ServiceWorker registration successful');
+      })
+      .catch((err) => {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+  }
 });
 
 function loadReportHistory() {
-    const reportHistoryList = document.getElementById('reportHistoryList');
-    reportHistoryList.innerHTML = `
+  const reportHistoryList = document.getElementById('reportHistoryList');
+  reportHistoryList.innerHTML = `
         <div class="list-group-item">
             <div class="d-flex justify-content-between">
                 <span>No reports found</span>
@@ -67,11 +68,11 @@ function loadReportHistory() {
 }
 
 function loadNearbyStations() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-            const { latitude, longitude } = position.coords;
-            const map = document.getElementById('nearbyStationsMap');
-            map.innerHTML = `
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      const map = document.getElementById('nearbyStationsMap');
+      map.innerHTML = `
                 <iframe
                     width="100%"
                     height="100%"
@@ -82,30 +83,30 @@ function loadNearbyStations() {
                     src="https://maps.google.com/maps?q=fire+station+near+me&z=13&output=embed">
                 </iframe>
             `;
-        });
-    }
+    });
+  }
 }
 
 function setupVoiceInput() {
-    const voiceInput = document.createElement('div');
-    voiceInput.className = 'voice-input';
-    voiceInput.innerHTML = `
+  const voiceInput = document.createElement('div');
+  voiceInput.className = 'voice-input';
+  voiceInput.innerHTML = `
         <button onclick="startVoiceInput()">
             <i class="fas fa-microphone"></i>
         </button>
     `;
-    document.querySelector('.form-group').appendChild(voiceInput);
+  document.querySelector('.form-group').appendChild(voiceInput);
 }
 
 function startVoiceInput() {
-    const recognition = new webkitSpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
 
-    recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        Notification.show('Voice input received: ' + transcript, 'success');
-    };
+  recognition.onresult = function (event) {
+    const transcript = event.results[0][0].transcript;
+    Notification.show('Voice input received: ' + transcript, 'success');
+  };
 
-    recognition.start();
-} 
+  recognition.start();
+}

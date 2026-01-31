@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const schema = mongoose.Schema(
   {
@@ -9,12 +9,12 @@ const schema = mongoose.Schema(
     status: {
       type: String,
       enum: ['pending', 'approved', 'denied'],
-      default: 'pending'
-    }
+      default: 'pending',
+    },
   },
-  { collection: "fire", timestamp: true }
+  { collection: 'fire', timestamp: true }
 );
 
-const model = mongoose.model("fire", schema);
+const model = mongoose.model('fire', schema);
 
 module.exports = { fireModel: model };

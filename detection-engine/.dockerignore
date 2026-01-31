@@ -1,0 +1,8 @@
+.venv
+__pycache__
+.git
+.env
+tests
+.vscode
+Dockerfile
+research-baseline/runs

@@ -1,27 +1,76 @@
-# PyroGuardian: Edge-AI Wildfire Detection & Monitoring Suite
+# PyroGuardian: Edge-AI Fire Detection & Monitoring Suite
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![DeepStream 6.2+](https://img.shields.io/badge/NVIDIA-DeepStream_6.2+-green.svg)](https://developer.nvidia.com/deepstream-sdk)
 
-## 🌟 Overview
-PyroGuardian is an end-to-end computer vision ecosystem designed for real-time wildfire detection, risk assessment, and emergency reporting. It integrates high-performance AI at the edge with a user-friendly cloud-connected dashboard.
+
+## Overview
+PyroGuardian is an end-to-end computer vision ecosystem designed for real-time fire detection, risk assessment, and emergency reporting. It integrates high-performance AI at the edge with a user-friendly cloud-connected dashboard.
 
 ### **System Architecture**
 ```mermaid
 graph TD
-    A[Camera Feed / User Upload] --> B{AI Engine Selection}
-    B -->|Baseline| C[YOLOv5 PyTorch]
-    B -->|Production| D[RT-DETR TensorRT]
-    C --> E[Inference Results]
-    D --> E
-    E --> F[Severity Logic]
-    F -->|High Risk| G[AWS SNS Alert]
-    E --> H[Admin Dashboard]
-    I[User Reports] --> J[Node.js API]
-    J --> K[(MongoDB)]
-    K --> H
+    %% Actors
+    User((Public User))
+    Admin((Admin / Firefighter))
+
+    %% Edge System (UAV / Fixed)
+    subgraph Edge ["Edge Computing"]
+        Source[Drone Camera] --> AI{AI Engine}
+        AI -->|Baseline| YOLO["YOLOv5, ( MobileNetV2 -User Uploads classification)"]
+        AI -->|Research| RT[RT-DETR]
+        YOLO & RT --> Stream[Live Annotated Feed]
+        YOLO & RT --> Logic[Severity & Analytics]
+        Logic -->|High Risk| SNS[AWS SNS Alert]
+        Logic -->|Telemetry| Data[Analytics & Evidence]
+    end
+
+    %% Cloud Infrastructure
+    subgraph Cloud ["Management Platform"]
+        Data ==>|HTTP POST| API[Node.js API]
+        User -->|Manual Report| API
+        API --> DB[(MongoDB)]
+        DB --> Dash[Integrated Dashboard]
+    end
+
+    %% Integrated Communications
+    SNS -.->|SMS / Email| Admin
+    Stream ==>|RTSP| Admin
+    Dash -->|Monitor & Control| Admin
 ```
+---
+
+## 🏆 Awards & Recognition
+*   **1st Runner-Up** – [Honeywell Building Technologies Drone Hackathon 2024](https://www.honeywell.com/). 
+    *   Recognized for "Mission-Critical Fire Detection" at the Honeywell Bangalore Campus.
+    *   Awarded for excellence in UAV-Edge integration and real-time severity classification.
+
+    <p align="center">
+    <img src="assets/award.jpg"
+        alt="Honeywell Drone Hackathon Award"
+        width="420"
+        height="280"
+        style="object-fit: cover;"/>
+    <img src="assets/Honeywell.jpg"
+        alt="PyroGuardian Drone Demonstration"
+        width="420"
+        height="280"
+        style="object-fit: cover;"/>
+    <img>
+    <p align="center">
+    <a href="https://drive.google.com/file/d/1fyaNfSNrJdT4sj8eMezI0X0dS66r8lj6/view?usp=drive_link" target="_blank">
+        <img src="assets/UAV–DroneSetup.png"
+            width="420"
+            height="280"
+            style="object-fit: cover;"/><br/>
+        <b>▶ Watch Demo Video</b>
+    </a>
+    </p>
+
+    </p>
+
+
 
 ---
 
@@ -47,50 +96,73 @@ graph TD
 ---
 
 ## 🛠 Tech Stack
-*   **Vision:** RT-DETR, YOLOv11, OpenCV, GStreamer.
-*   **Optimization:** NVIDIA TensorRT, CUDA, TAO Toolkit.
-*   **Cloud:** AWS SNS, Twilio, Boto3.
-*   **Web:** Node.js, Express, MongoDB, Leaflet.js (Maps), Chart.js.
+
+### Edge AI (Detection Engine)
+*   **Platform:** NVIDIA Jetson Nano
+*   **Pipeline:** GStreamer (DeepStream SDK), Python bindings (`pyds`)
+*   **Models:** RT-DETR (TensorRT Optimized), YOLOv5 (Baseline)
+*   **Tools:** OpenCV, PyTorch
+
+### Web Dashboard (Control Plane)
+*   **Runtime:** Node.js (v18), Express.js
+*   **Database:** MongoDB, Mongoose ODM
+*   **Frontend:** Vanilla JS, Leaflet.js, Chart.js
+*   **Security:** Helmet, Rate-Limiting, Bcrypt
+
+### DevOps & Infrastructure
+*   **Containerization:** Docker (Multi-stage, Non-root security)
+*   **CI/CD:** GitHub Actions (Automated Testing & Linting)
+*   **Cloud:** AWS SNS, Twilio
 
 ---
 
-## 📖 Setup & Configuration
+## 👩‍💻 Engineering Standards
+This project adheres to production-grade software engineering practices:
+*   **CI/CD Pipeline:** Automated testing for both Python and Node.js environments on every push.
+*   **Code Quality:** Enforced via `ruff`, `black` (Python) and `eslint`, `prettier` (JavaScript).
+*   **Security:** Hardened Docker containers, API rate limiting, and strict environment variable management.
 
-### 1. Environment Variables
-Both modules require `.env` files for security. Templates are provided as `.env.example`.
+---
 
-**AI Engine (`detection-engine/.env`):**
-```env
-TWILIO_ACCOUNT_SID=your_sid
-TWILIO_AUTH_TOKEN=your_token
-SNS_TOPIC_ARN=your_aws_sns_arn
-AWS_ACCESS_KEY_ID=your_key
-AWS_SECRET_ACCESS_KEY=your_secret
-```
+## 📚 Documentation & Manual Setup
+For component-specific details, development guides, and architecture deep-dives, please consult the respective documentation:
 
-**Web Dashboard (`web-dashboard/.env`):**
-```env
-MONGO_URI=your_mongodb_uri
-PORT=8000
-ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=securepassword
-WEATHER_API_KEY=your_openweathermap_key
-```
+*   **[🤖 Detection Engine Documentation](./detection-engine/README.md)**
+    *   *For: AI Engineers, Edge Deployment, Model Training (TAO), GStreamer Pipelines.*
+*   **[💻 Web Dashboard Documentation](./web-dashboard/README.md)**
+    *   *For: Full-stack Developers, API Specs, Database Schema.*
 
-### 2. Installation
-**Detection Engine:**
+---
+
+## 🚀 Quick Start (Golden Path)
+The fastest way to spin up the entire PyroGuardian ecosystem (Dashboard + Database + Detection Engine) is via Docker Compose.
+
+### Prerequisites
+*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+
+### 1. Configure Environment
+Create the necessary environment files from templates:
 ```bash
-cd detection-engine
-pip install -r requirements.txt
-python deployment/fire_detection_pipeline.py
+# Root environment (optional override)
+cp detection-engine/.env.example detection-engine/.env
+cp web-dashboard/.env.example web-dashboard/.env
 ```
 
-**Web Dashboard:**
+### 2. Launch System
 ```bash
-cd web-dashboard
-npm install
-node server.js
+docker-compose up --build
 ```
+
+### 3. Access Services
+*   **Web Dashboard:** [http://localhost:8000](http://localhost:8000)
+*   **MongoDB:** `mongodb://localhost:27017`
+
+---
+
+## 📖 Manual Developer Setup
+If you prefer to run components individually for development, please refer to the specific installation guides:
+1.  **AI Engine:** Follow the [Detection Engine Setup](./detection-engine/README.md#setup--usage).
+2.  **Web Dashboard:** Follow the [Dashboard Setup](./web-dashboard/README.md#developer-quick-start).
 
 ---
 

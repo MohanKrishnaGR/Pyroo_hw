@@ -1,48 +1,48 @@
 :root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --accent-color: #e74c3c;
-    --text-color: #2c3e50;
-    --light-bg: #f8f9fa;
-    --success-color: #2ecc71;
-    --warning-color: #f1c40f;
-    --dark-bg: #1a1a1a;
-    --dark-text: #ffffff;
-    --hero-bg: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9));
-    --transition-speed: 0.3s;
-    --notification-success: #2ecc71;
-    --notification-error: #e74c3c;
-    --emergency-red: #e74c3c;
-    --emergency-yellow: #f1c40f;
-    --emergency-green: #2ecc71;
-    --emergency-text: #ffffff;
-    --emergency-bg: #2c3e50;
-    --critical-size: 1.2rem;
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  --text-color: #2c3e50;
+  --light-bg: #f8f9fa;
+  --success-color: #2ecc71;
+  --warning-color: #f1c40f;
+  --dark-bg: #1a1a1a;
+  --dark-text: #ffffff;
+  --hero-bg: linear-gradient(rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.9));
+  --transition-speed: 0.3s;
+  --notification-success: #2ecc71;
+  --notification-error: #e74c3c;
+  --emergency-red: #e74c3c;
+  --emergency-yellow: #f1c40f;
+  --emergency-green: #2ecc71;
+  --emergency-text: #ffffff;
+  --emergency-bg: #2c3e50;
+  --critical-size: 1.2rem;
 }
 
-[data-theme="dark"] {
-    --primary-color: #34495e;
-    --text-color: #ffffff;
-    --light-bg: var(--dark-bg);
-    --dark-text: #ffffff;
-    --hero-bg: linear-gradient(rgba(26, 26, 26, 0.9), rgba(26, 26, 26, 0.9));
-    --emergency-bg: #1a1a1a;
+[data-theme='dark'] {
+  --primary-color: #34495e;
+  --text-color: #ffffff;
+  --light-bg: var(--dark-bg);
+  --dark-text: #ffffff;
+  --hero-bg: linear-gradient(rgba(26, 26, 26, 0.9), rgba(26, 26, 26, 0.9));
+  --emergency-bg: #1a1a1a;
 }
 
-[data-emergency="true"] {
-    --primary-color: var(--emergency-red);
-    --text-color: var(--emergency-text);
-    --light-bg: var(--emergency-bg);
-    font-size: var(--critical-size);
+[data-emergency='true'] {
+  --primary-color: var(--emergency-red);
+  --text-color: var(--emergency-text);
+  --light-bg: var(--emergency-bg);
+  font-size: var(--critical-size);
 }
 
 body {
-    background-color: var(--light-bg);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    transition: background-color var(--transition-speed) ease;
+  background-color: var(--light-bg);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background-color var(--transition-speed) ease;
 }
 
 /* Import other CSS components */
@@ -52,4 +52,4 @@ body {
 @import url('components/emergency.css');
 @import url('components/modal.css');
 @import url('components/notification.css');
-@import url('components/theme.css'); 
+@import url('components/theme.css');

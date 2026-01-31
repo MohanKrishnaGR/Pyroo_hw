@@ -1,181 +1,181 @@
 .emergency-header {
-    background-color: var(--emergency-red);
-    color: white;
-    padding: 10px;
-    text-align: center;
-    font-weight: bold;
-    display: none;
+  background-color: var(--emergency-red);
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-weight: bold;
+  display: none;
 }
 
 .emergency-contacts {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    padding: 15px;
-    z-index: 1000;
-    display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  z-index: 1000;
+  display: none;
 }
 
 .emergency-contacts button {
-    display: block;
-    width: 100%;
-    margin: 5px 0;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background: var(--emergency-red);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: var(--emergency-red);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .emergency-mode-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--emergency-red);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-    z-index: 1000;
-    transition: all 0.3s ease;
-    animation: pulse 2s infinite;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--emergency-red);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+  z-index: 1000;
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
 }
 
 .emergency-mode-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
 }
 
 .emergency-mode-toggle.active {
-    animation: none;
-    background: #c0392b;
-    box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+  animation: none;
+  background: #c0392b;
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
 }
 
 .emergency-mode-toggle i {
-    font-size: 24px;
-    transition: transform 0.3s ease;
+  font-size: 24px;
+  transition: transform 0.3s ease;
 }
 
 .emergency-mode-toggle.active i {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .emergency-mode-tooltip {
-    position: absolute;
-    right: 70px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--emergency-red);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
+  position: absolute;
+  right: 70px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--emergency-red);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .emergency-mode-toggle:hover .emergency-mode-tooltip {
-    opacity: 1;
+  opacity: 1;
 }
 
 .emergency-exit-button {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: white;
-    color: var(--emergency-red);
-    border: 2px solid var(--emergency-red);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 1001;
-    transition: all 0.3s ease;
-    animation: pulseExit 2s infinite;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: white;
+  color: var(--emergency-red);
+  border: 2px solid var(--emergency-red);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  transition: all 0.3s ease;
+  animation: pulseExit 2s infinite;
 }
 
 .emergency-exit-button:hover {
-    transform: scale(1.1);
-    background: var(--emergency-red);
-    color: white;
+  transform: scale(1.1);
+  background: var(--emergency-red);
+  color: white;
 }
 
 .emergency-exit-button i {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .emergency-exit-tooltip {
-    position: absolute;
-    left: 60px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: white;
-    color: var(--emergency-red);
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    border: 1px solid var(--emergency-red);
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  color: var(--emergency-red);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border: 1px solid var(--emergency-red);
 }
 
 .emergency-exit-button:hover .emergency-exit-tooltip {
-    opacity: 1;
+  opacity: 1;
 }
 
 @keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
-    }
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
 }
 
 @keyframes pulseExit {
-    0% {
-        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
-    }
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
 }
 
 @media (max-width: 768px) {
-    [data-emergency="true"] {
-        --critical-size: 1.4rem;
-    }
+  [data-emergency='true'] {
+    --critical-size: 1.4rem;
+  }
 
-    .emergency-contacts {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        top: auto;
-    }
-} 
+  .emergency-contacts {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    top: auto;
+  }
+}

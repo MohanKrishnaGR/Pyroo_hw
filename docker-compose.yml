@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Web Dashboard
+  dashboard:
+    build: ./web-dashboard
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=production
+      - PORT=8000
+      - MONGO_URI=mongodb://mongo:27017/pyro_guardian
+      - JWT_SECRET=${JWT_SECRET:-supersecret_dev_key}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+    depends_on:
+      - mongo
+    networks:
+      - pyro-net
+
+  # Database
+  mongo:
+    image: mongo:6.0
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - pyro-net
+
+  # Detection Engine (Simulation Mode)
+  detection-engine:
+    build: ./detection-engine
+    environment:
+      - SNS_TOPIC_ARN=${SNS_TOPIC_ARN}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+    volumes:
+      # Mount the code for development
+      - ./detection-engine:/app
+    networks:
+      - pyro-net
+
+networks:
+  pyro-net:
+    driver: bridge
+
+volumes:
+  mongo_data:
