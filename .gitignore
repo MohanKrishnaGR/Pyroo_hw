@@ -33,9 +33,9 @@ exp/
 # Data and Uploads
 uploads/
 dataset/
-*.jpg
-*.jpeg
-*.png
+# *.jpg
+# *.jpeg
+# *.png
 *.mp4
 *.avi
 curated_dataset_v1/
