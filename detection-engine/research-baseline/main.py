@@ -51,23 +51,29 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 from twilio.rest import Client
+from dotenv import load_dotenv
 
-# TWILIO_ACCOUNT_SID = 'AC5732734e63e31096e4980897da37442e'
-# TWILIO_AUTH_TOKEN = 'ed06c5e8f8937d783b9c6f03f3fa6899'
-# TWILIO_FROM = '+12317427390'  # Your Twilio phone number
-# TWILIO_TO = '+919080696129'   # Your verified recipient number
+# Load environment variables from .env file
+load_dotenv(dotenv_path=ROOT.parent / ".env")
 
-TWILIO_ACCOUNT_SID = 'ACb9aaefb5fd10043744b44f6543c2a74b'
-TWILIO_AUTH_TOKEN = 'eed185d3ff05a4cc90d55db5f81febe7'
-TWILIO_FROM = '+19785708248'  # Your Twilio phone number
-TWILIO_TO = '+919080696129'   # Your verified recipient number
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_FROM = os.getenv('TWILIO_FROM')
+TWILIO_TO = os.getenv('TWILIO_TO')
 
-twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+# Initialize Twilio client only if credentials are provided
+twilio_client = None
+if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
+    twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+else:
+    logger.warning("Twilio credentials not found in environment variables. SMS notifications disabled.")
+
 NOTIFICATION_INTERVAL = 5  # Seconds between notifications
 
-# AWS SNS setup (replace with actual values if needed)
-# sns_client = boto3.client('sns', region_name='ap-northeast-1')
-# SNS_TOPIC_ARN = 'arn:aws:sns:ap-northeast-1:959474344943:PG'
+# AWS SNS setup
+# Load SNS configuration from .env if needed
+# sns_client = boto3.client('sns', region_name=os.getenv('AWS_REGION', 'ap-northeast-1'))
+# SNS_TOPIC_ARN = os.getenv('SNS_TOPIC_ARN')
 # NOTIFICATION_INTERVAL = 30  # Seconds between notifications
 
 @smart_inference_mode()
@@ -244,7 +250,7 @@ def generate(
                 severity_color = (0, 0, 255) if severity == 'High' else (0, 165, 255) if severity == 'Medium' else (0, 255, 255)
                 cv2.putText(im0, severity_text, (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75, severity_color, 2, cv2.LINE_AA)
                 current_time = time.time()
-                if current_time - last_notification_time > NOTIFICATION_INTERVAL:
+                if twilio_client and (current_time - last_notification_time > NOTIFICATION_INTERVAL):
                     try:
                         message = twilio_client.messages.create(
                             # body=f"🔥 PyroGuardian Alert: {severity} severity detected at {time.strftime('%Y-%m-%d %H:%M:%S')} with classes {list(detected_classes)}"

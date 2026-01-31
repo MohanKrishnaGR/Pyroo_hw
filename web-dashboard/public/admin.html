@@ -1683,8 +1683,18 @@
         }
 
         // Weather API Integration
-        const WEATHER_API_KEY = 'd0b3db98d5bfc392bfb6ad07f5af4e8a';
+        let WEATHER_API_KEY = '';
         const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
+
+        async function fetchWeatherApiKey() {
+            try {
+                const response = await fetch('/api/config/weather');
+                const data = await response.json();
+                WEATHER_API_KEY = data.apiKey;
+            } catch (error) {
+                console.error('Error fetching Weather API key:', error);
+            }
+        }
 
         // Default location (Coimbatore)
         const DEFAULT_LOCATION = {
@@ -1696,6 +1706,7 @@
 
         async function getWeatherData(lat, lon) {
             try {
+                if (!WEATHER_API_KEY) await fetchWeatherApiKey();
                 const response = await fetch(`${WEATHER_API_URL}/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`);
                 if (!response.ok) {
                     throw new Error(`Weather API error: ${response.status}`);
@@ -1709,6 +1720,7 @@
 
         async function getWeatherForecast(lat, lon) {
             try {
+                if (!WEATHER_API_KEY) await fetchWeatherApiKey();
                 const response = await fetch(`${WEATHER_API_URL}/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`);
                 if (!response.ok) {
                     throw new Error(`Weather forecast API error: ${response.status}`);

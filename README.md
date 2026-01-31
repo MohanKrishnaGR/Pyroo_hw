@@ -36,9 +36,9 @@ graph TD
 ---
 
 ## 📁 Repository Structure
-*   **[`detection-engine/`](./detection-engine)**: Core AI modules.
-    *   `core/`: AWS & Alerting logic.
-    *   `deployment/`: DeepStream GStreamer pipelines for Jetson.
+*   **[`detection-engine/`](./detection-engine)**: Core AI modules optimized for Jetson.
+    *   `core/`: Alerting logic & AWS SNS/Twilio integration.
+    *   `deployment/`: DeepStream GStreamer pipelines.
     *   `training/`: NVIDIA TAO specifications for RT-DETR.
     *   `data-engineering/`: Dataset curation & augmentation tools.
     *   `research-baseline/`: Original YOLOv5 reference implementation.
@@ -49,23 +49,48 @@ graph TD
 ## 🛠 Tech Stack
 *   **Vision:** RT-DETR, YOLOv11, OpenCV, GStreamer.
 *   **Optimization:** NVIDIA TensorRT, CUDA, TAO Toolkit.
-*   **Cloud:** AWS SNS, Boto3.
+*   **Cloud:** AWS SNS, Twilio, Boto3.
 *   **Web:** Node.js, Express, MongoDB, Leaflet.js (Maps), Chart.js.
 
 ---
 
-## 📖 Setup Instructions
+## 📖 Setup & Configuration
 
-### AI Engine (Python)
-1. Navigate to `detection-engine/`
-2. Install dependencies: `pip install -r research-baseline/requirements.txt`
-3. Run optimized pipeline: `python deployment/fire_detection_pipeline.py`
+### 1. Environment Variables
+Both modules require `.env` files for security. Templates are provided as `.env.example`.
 
-### Web Dashboard (Node.js)
-1. Navigate to `web-dashboard/`
-2. Create `.env` from `.env.example`
-3. Install: `npm install`
-4. Start: `node server.js`
+**AI Engine (`detection-engine/.env`):**
+```env
+TWILIO_ACCOUNT_SID=your_sid
+TWILIO_AUTH_TOKEN=your_token
+SNS_TOPIC_ARN=your_aws_sns_arn
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+```
+
+**Web Dashboard (`web-dashboard/.env`):**
+```env
+MONGO_URI=your_mongodb_uri
+PORT=8000
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=securepassword
+WEATHER_API_KEY=your_openweathermap_key
+```
+
+### 2. Installation
+**Detection Engine:**
+```bash
+cd detection-engine
+pip install -r requirements.txt
+python deployment/fire_detection_pipeline.py
+```
+
+**Web Dashboard:**
+```bash
+cd web-dashboard
+npm install
+node server.js
+```
 
 ---
 

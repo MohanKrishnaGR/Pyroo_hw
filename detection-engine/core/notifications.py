@@ -1,5 +1,12 @@
 import boto3
 import logging
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load environment variables
+env_path = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=env_path)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -7,15 +14,22 @@ class NotificationManager:
     """Manages notifications for fire detection events."""
     
     def __init__(self, sns_topic_arn=None):
-        self.sns_topic_arn = sns_topic_arn
+        # Use provided ARN or fall back to environment variable
+        self.sns_topic_arn = sns_topic_arn or os.getenv("SNS_TOPIC_ARN")
         self.sns_client = None
-        if sns_topic_arn:
-            self.initialize_sns(sns_topic_arn)
+        if self.sns_topic_arn:
+            self.initialize_sns(self.sns_topic_arn)
+        else:
+            LOGGER.warning("SNS_TOPIC_ARN not provided or found in environment. SNS notifications disabled.")
 
     def initialize_sns(self, sns_topic_arn):
         """Initialize AWS SNS client."""
         try:
-            self.sns_client = boto3.client("sns")
+            # boto3 will automatically check AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+            self.sns_client = boto3.client(
+                "sns",
+                region_name=os.getenv("AWS_REGION", "us-east-1")
+            )
             # Verify topic exists
             self.sns_client.get_topic_attributes(TopicArn=sns_topic_arn)
             LOGGER.info(f"AWS SNS initialized with topic: {sns_topic_arn}")

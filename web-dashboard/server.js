@@ -9,14 +9,20 @@ require("dotenv").config();
 connectDb();
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 
-// Hard-coded array of predefined email and password pairs
+// Load users from environment variables or a secure source
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+
 const users = [
-  { email: "mohankrishnagr08@gmail.com", password: "M8204@mohan" },
-  { email: "user2@example.com", password: "password2" },
-  // Add more users as needed
+  { email: ADMIN_EMAIL, password: ADMIN_PASSWORD }
 ];
+
+// Endpoint to provide the weather API key to the frontend
+app.get("/api/config/weather", (req, res) => {
+  res.json({ apiKey: process.env.WEATHER_API_KEY });
+});
 
 // Middleware to parse JSON in the request body
 app.use(bodyParser.json());

@@ -1,0 +1,10 @@
+# Core Dependencies
+boto3
+python-dotenv
+twilio
+opencv-python
+numpy
+flask
+
+# For YOLOv5 Baseline
+-r research-baseline/requirements.txt
